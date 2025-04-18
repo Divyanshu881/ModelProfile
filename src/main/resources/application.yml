@@ -1,0 +1,76 @@
+# ========= COMMON (DEFAULT) CONFIG =========
+server:
+  port: 9051
+
+spring:
+  profiles:
+    active: local  # <- Switch this to dev/prod as needed
+
+# ========= LOCAL CONFIG =========
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+elasticsearch:
+  host: localhost
+  port: 9200
+
+file:
+  upload-dir: ./uploads
+
+app:
+  storage:
+    type: local
+    local:
+      path: ./uploads
+      base-url: /uploads
+    s3:
+      bucket-name: my-model-bucket
+      region: ind
+
+# ========= DEV CONFIG =========
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+elasticsearch:
+  host: dev-es.internal
+  port: 9200
+
+file:
+  upload-dir: ./dev-uploads
+
+app:
+  storage:
+    type: local
+    local:
+      path: ./dev-uploads
+      base-url: /uploads
+    s3:
+      bucket-name: dev-model-bucket
+      region: ap-south-1
+
+# ========= PROD CONFIG =========
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+elasticsearch:
+  host: prod-es.example.com
+  port: 9200
+
+file:
+  upload-dir: /mnt/data/uploads
+
+app:
+  storage:
+    type: s3
+    s3:
+      bucket-name: prod-model-bucket
+      region: ap-south-1
