@@ -10,7 +10,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 @RestController
@@ -21,8 +26,21 @@ public class ModelController {
     private final ModelService modelService;
 
     @PostMapping("/create")
-    public ResponseEntity<ModelResponse> createModel(@Valid @ModelAttribute ModelRequest request) {
+    public ResponseEntity<?> createModel(@Valid @ModelAttribute ModelRequest request, BindingResult bindingResult) {
         log.info("Received request to create new model");
+
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getAllErrors().forEach(error -> {
+                if (error instanceof FieldError) {
+                    errors.put(((FieldError) error).getField(), error.getDefaultMessage());
+                } else {
+                    errors.put(error.getObjectName(), error.getDefaultMessage());
+                }
+            });
+            return ResponseEntity.badRequest().body(errors);
+        }
+
         ModelResponse response = modelService.createModel(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -35,9 +53,21 @@ public class ModelController {
     }
 
     @PostMapping("/viewAll")
-    public ResponseEntity<HelperPage<ModelResponse>> searchModels(@Valid @RequestBody ViewRequest viewRequest) throws Exception {
+    public ResponseEntity<?> searchModels(@Valid @RequestBody ViewRequest viewRequest, BindingResult bindingResult) throws Exception {
 
         log.info("Received search request with parameters {}", viewRequest);
+
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getAllErrors().forEach(error -> {
+                if (error instanceof FieldError) {
+                    errors.put(((FieldError) error).getField(), error.getDefaultMessage());
+                } else {
+                    errors.put(error.getObjectName(), error.getDefaultMessage());
+                }
+            });
+            return ResponseEntity.badRequest().body(errors);
+        }
 
         HelperPage<ModelResponse> response = modelService.searchModels(viewRequest);
         response.setMessage("Models retrieved successfully");
@@ -46,9 +76,21 @@ public class ModelController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<ModelResponse> updateModel(
+    public ResponseEntity<?> updateModel(
             @PathVariable String id,
-            @Valid @RequestBody ModelRequest request) {
+            @Valid @RequestBody ModelRequest request, BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getAllErrors().forEach(error -> {
+                if (error instanceof FieldError) {
+                    errors.put(((FieldError) error).getField(), error.getDefaultMessage());
+                } else {
+                    errors.put(error.getObjectName(), error.getDefaultMessage());
+                }
+            });
+            return ResponseEntity.badRequest().body(errors);
+        }
 
         log.info("Received request to update model with ID: {}", id);
         ModelResponse response = modelService.updateModel(id, request);

@@ -23,33 +23,33 @@ public class ModelProfile {
     @Field(type = FieldType.Keyword, name = "name")
     private String name;
 
-    @Field(type = FieldType.Integer, name = "age")
-    private Integer age;
+    @Field(type = FieldType.Keyword, name = "age")
+    private String age;
 
-    @Field(type = FieldType.Double, name = "height")
-    private Double height; // in cm
+    @Field(type = FieldType.Keyword, name = "height")
+    private String height; // in cm
 
     @Field(type = FieldType.Keyword, name = "gender")
     private Gender gender; // "MALE" or "FEMALE"
 
     // Measurements - different for male/female
-    @Field(type = FieldType.Double, name = "bust")
-    private Double bust; // for female
+    @Field(type = FieldType.Keyword, name = "bust")
+    private String bust; // for female
 
-    @Field(type = FieldType.Double, name = "chest")
-    private Double chest; // for male
+    @Field(type = FieldType.Keyword, name = "chest")
+    private String chest; // for male
 
-    @Field(type = FieldType.Double, name = "waist")
-    private Double waist; // for female
+    @Field(type = FieldType.Keyword, name = "waist")
+    private String waist; // for female
 
-    @Field(type = FieldType.Double, name = "lowerWaist")
-    private Double lowerWaist; // for male
+    @Field(type = FieldType.Keyword, name = "lowerWaist")
+    private String lowerWaist; // for male
 
-    @Field(type = FieldType.Double, name = "hips")
-    private Double hips;
+    @Field(type = FieldType.Keyword, name = "hips")
+    private String hips;
 
-    @Field(type = FieldType.Double, name = "shoeSize")
-    private Double shoeSize;
+    @Field(type = FieldType.Keyword, name = "shoeSize")
+    private String shoeSize;
 
     @Field(type = FieldType.Keyword, name = "eyes")
     private String eyes;
