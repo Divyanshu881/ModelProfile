@@ -27,14 +27,14 @@ public class ModelController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/view/{id}")
     public ResponseEntity<ModelResponse> getModelById(@PathVariable String id) {
         log.info("Received request to get model with ID: {}", id);
         ModelResponse response = modelService.getModelById(id);
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/view")
+    @PostMapping("/viewAll")
     public ResponseEntity<HelperPage<ModelResponse>> searchModels(@Valid @RequestBody ViewRequest viewRequest) throws Exception {
 
         log.info("Received search request with parameters {}", viewRequest);

@@ -139,7 +139,7 @@ public class ElasticSearchUtility {
                     .order(order.isAscending() ? SortOrder.Asc : SortOrder.Desc))));
         }
 
-        sortOptionsList.add(SortOptions.of(s -> s.field(f -> f.field("_id").order(SortOrder.Desc))));
+        sortOptionsList.add(SortOptions.of(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc))));
 
         return sortOptionsList;
     }
@@ -241,6 +241,7 @@ public class ElasticSearchUtility {
                 .map(hit -> {
                     Map<String, Object> map = hit.source().to(Map.class);
                     map.remove("_class");
+                    map.put("id", hit.id());
                     return map;
                 })
                 .collect(Collectors.toList());

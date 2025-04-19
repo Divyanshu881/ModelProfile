@@ -27,7 +27,7 @@ public class ModelRequest {
     @DecimalMax(value = "250", message = "Height must be less than 250 cm")
     private Double height;
 
-    @NotBlank(message = "Gender is required")
+    @NotNull(message = "Gender is required")
     private Gender gender; // "MALE" or "FEMALE"
 
     // Female-specific

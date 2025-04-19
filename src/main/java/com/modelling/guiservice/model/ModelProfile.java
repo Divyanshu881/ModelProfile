@@ -20,7 +20,7 @@ public class ModelProfile {
     @Id
     private String id;
 
-    @Field(type = FieldType.Text, name = "name")
+    @Field(type = FieldType.Keyword, name = "name")
     private String name;
 
     @Field(type = FieldType.Integer, name = "age")
@@ -51,7 +51,7 @@ public class ModelProfile {
     @Field(type = FieldType.Double, name = "shoeSize")
     private Double shoeSize;
 
-    @Field(type = FieldType.Text, name = "eyes")
+    @Field(type = FieldType.Keyword, name = "eyes")
     private String eyes;
 
     @Field(type = FieldType.Boolean, name = "isBooked")
@@ -60,10 +60,14 @@ public class ModelProfile {
     @Field(type = FieldType.Nested, name = "images")
     private List<ModelImage> images;
 
-    @Field(type = FieldType.Date, name = "createdAt")
+    @Field(type = FieldType.Date,
+            format = {},
+            pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
-    @Field(type = FieldType.Date, name = "updatedAt")
+    @Field(type = FieldType.Date,
+            format = {},
+            pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime updatedAt;
 }
 

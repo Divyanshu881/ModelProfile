@@ -11,6 +11,8 @@ import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -36,6 +38,13 @@ public class ElasticsearchConfig {
         createTemplateIfNotExists(client, "model-profiles-template");
 
         return client;
+    }
+
+    @Bean(name = {"elasticsearchOperation","elasticsearchTemplate"})
+    public ElasticsearchOperations elasticsearchOperations(
+            ElasticsearchClient client
+    ) {
+        return new ElasticsearchTemplate(client);
     }
 
 

@@ -10,10 +10,10 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @AllArgsConstructor
 @Builder
 public class ModelImage {
-    @Field(type = FieldType.Text, name = "url")
+    @Field(type = FieldType.Keyword, name = "url")
     private String url;
 
-    @Field(type = FieldType.Text, name = "type") // "PORTFOLIO", "PROFILE", etc.
+    @Field(type = FieldType.Keyword, name = "type") // "PORTFOLIO", "PROFILE", etc.
     private String type;
 
     @Field(type = FieldType.Integer, name = "order")

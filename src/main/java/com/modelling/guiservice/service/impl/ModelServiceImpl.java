@@ -1,6 +1,5 @@
 package com.modelling.guiservice.service.impl;
 
-import co.elastic.clients.elasticsearch._types.SortOrder;
 import com.modelling.guiservice.dto.exception.ModelNotFoundException;
 import com.modelling.guiservice.dto.helper.ElasticSearchResult;
 import com.modelling.guiservice.dto.helper.HelperPage;
@@ -19,6 +18,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
+import org.springframework.data.elasticsearch.core.query.IndexQuery;
+import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +40,8 @@ public class ModelServiceImpl implements ModelService {
     private final ModelRepository modelRepository;
     private final FileStorageService fileStorageService;
     private final ElasticSearchUtility elasticSearchUtility;
+
+    private final ElasticsearchOperations elasticsearchOperations;
 
     @Transactional
     public ModelResponse createModel(ModelRequest request) {
@@ -74,8 +80,21 @@ public class ModelServiceImpl implements ModelService {
                     .build();
 
             // Save to Elasticsearch
-            ModelProfile savedModel = modelRepository.save(model);
-            log.info("Successfully created model with ID: {}", savedModel.getId());
+            IndexQuery indexQuery = new IndexQueryBuilder()
+                    .withObject(model)
+                    .build();
+
+            String documentId = elasticsearchOperations.index(
+                    indexQuery,
+                    IndexCoordinates.of(indexName)
+            );
+            log.info("Successfully created model with ID: {}", documentId);
+
+            ModelProfile savedModel = elasticsearchOperations.get(
+                    documentId,
+                    ModelProfile.class,
+                    IndexCoordinates.of(indexName)
+            );
 
             return mapToResponse(savedModel);
         } catch (Exception e) {
@@ -97,8 +116,8 @@ public class ModelServiceImpl implements ModelService {
     public HelperPage<ModelResponse> searchModels(ViewRequest request) throws Exception {
         log.info("Request received to fetch data from es");
 
-        String sortField = StringUtils.defaultIfBlank(request.getSortValue(), "id");
-        Sort.Direction sortDir = Sort.Direction.fromOptionalString(request.getSortOrder()).orElse(Sort.Direction.DESC);
+        String sortField = StringUtils.defaultIfBlank(request.getSortValue(), "name");
+        Sort.Direction sortDir = Sort.Direction.fromOptionalString(request.getSortOrder()).orElse(Sort.Direction.ASC);
         Pageable pageable = PageRequest.of(request.getPage(), request.getPageSize(), sortDir, sortField);
 
         try {
@@ -115,11 +134,16 @@ public class ModelServiceImpl implements ModelService {
     public ModelResponse updateModel(String id, ModelRequest request) {
         log.info("Updating model with ID: {}", id);
 
-        ModelProfile existingModel = modelRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("Model not found with ID: {}", id);
-                    return new ModelNotFoundException(id);
-                });
+        ModelProfile existingModel = elasticsearchOperations.get(
+                id,
+                ModelProfile.class,
+                IndexCoordinates.of(indexName)
+        );
+
+        if (existingModel == null) {
+            log.warn("Model not found with ID: {}", id);
+            throw new ModelNotFoundException(id);
+        }
 
         // Update fields
         existingModel.setName(request.getName());
@@ -135,7 +159,21 @@ public class ModelServiceImpl implements ModelService {
         existingModel.setEyes(request.getEyes());
         existingModel.setUpdatedAt(LocalDateTime.now());
 
-        ModelProfile updatedModel = modelRepository.save(existingModel);
+        // 3. Prepare update query
+        UpdateQuery updateQuery = UpdateQuery.builder(id)
+                .withDocument(elasticsearchOperations.getElasticsearchConverter().mapObject(existingModel))
+                .withDocAsUpsert(false) // Only update existing docs
+                .build();
+
+        // 4. Execute update
+        elasticsearchOperations.update(updateQuery, IndexCoordinates.of(indexName));
+
+        // 5. Return updated model
+        ModelProfile updatedModel = elasticsearchOperations.get(
+                id,
+                ModelProfile.class,
+                IndexCoordinates.of(indexName)
+        );
         log.info("Successfully updated model with ID: {}", id);
 
         return mapToResponse(updatedModel);
